@@ -35,6 +35,16 @@ namespace avr{
 	eeprom_ref<int8_t>::operator int8_t () const {
 		return static_cast<int8_t>(eeprom_read_byte(reinterpret_cast<uint8_t*>(ptr)));
 	}
+
+	template<>
+	void eeprom_ref<uint8_t>::operator=(const uint8_t i) {
+		eeprom_write_byte(ptr, i);
+	}
+	
+	template<>
+	eeprom_ref<uint8_t>::operator uint8_t () const {
+		return eeprom_read_byte(ptr);
+	}
 	
 	template<typename T> concept WORD_LIKE = (sizeof(T) == sizeof(uint16_t));
 	template<typename T>
