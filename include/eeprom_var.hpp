@@ -10,16 +10,36 @@ namespace avr{
 		T* const ptr;
 	public:
 		explicit eeprom_ref(T* const p): ptr(p) {}
-		operator const T () const ;
-		void operator=(const T& n){
+		operator T () const ;
+		void operator=(const T){
 			static_assert("Not implemented yet");	
 		}
 	};
 
+	template<>
+	eeprom_ref<uint16_t>::operator uint16_t () const {
+		return eeprom_read_word(ptr);
+	}
+	
+	template<>
+	void eeprom_ref<uint16_t>::operator=(const uint16_t i) {
+		eeprom_write_word(ptr, i);
+	}
+	
+	template<>
+	void eeprom_ref<int8_t>::operator=(const int8_t i) {
+		eeprom_write_byte(reinterpret_cast<uint8_t*>(ptr), static_cast<uint8_t>(i));
+	}
+	
+	template<>
+	eeprom_ref<int8_t>::operator int8_t () const {
+		return static_cast<int8_t>(eeprom_read_byte(reinterpret_cast<uint8_t*>(ptr)));
+	}
+	
 	template<typename T> concept WORD_LIKE = (sizeof(T) == sizeof(uint16_t));
 	template<typename T>
 		requires WORD_LIKE<T>
-	eeprom_ref<T>::operator const T () const {
+	eeprom_ref<T>::operator T () const {
 		union nn{
 			uint16_t nat;
 			const T  ret;
