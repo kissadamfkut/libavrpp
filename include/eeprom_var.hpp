@@ -3,7 +3,7 @@
 #include<array>
 #include<avr/eeprom.h>
 
-namespace avr{
+namespace avr{	
 	template<typename T>
 	struct eeprom_ref{
 	private:
@@ -12,22 +12,25 @@ namespace avr{
 		explicit eeprom_ref(T* const p): ptr(p) {}
 		operator T () const ;
 		void operator=(const T){
+			static_assert("Do not implement, compiler optimizations for operator= functions, volatileness etc.");	
+		}
+		void set(const T){
 			static_assert("Not implemented yet");	
 		}
 	};
 
 	template<>
 	eeprom_ref<uint16_t>::operator uint16_t () const {
-		return eeprom_read_word(ptr);
+		return eeprom_read_word(const_cast<uint16_t const*>(ptr));
 	}
 	
 	template<>
-	void eeprom_ref<uint16_t>::operator=(const uint16_t i) {
+	void eeprom_ref<uint16_t>::set(const uint16_t i) {
 		eeprom_write_word(ptr, i);
 	}
 	
 	template<>
-	void eeprom_ref<int8_t>::operator=(const int8_t i) {
+	void eeprom_ref<int8_t>::set(const int8_t i) {
 		eeprom_write_byte(reinterpret_cast<uint8_t*>(ptr), static_cast<uint8_t>(i));
 	}
 	
@@ -37,7 +40,7 @@ namespace avr{
 	}
 
 	template<>
-	void eeprom_ref<uint8_t>::operator=(const uint8_t i) {
+	void eeprom_ref<uint8_t>::set(const uint8_t i) {
 		eeprom_write_byte(ptr, i);
 	}
 	
